@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}My RSS Feeds{% endblock %}
+
+{% block content %}
+    <h1>My RSS Feeds</h1>
+    
+    {% if feeds %}
+        <div class="feeds-grid">
+            {% for feed in feeds %}
+                <div class="feed-card">
+                    <div class="feed-header">
+                        <h2>
+                            <a href="{{ url_for('view_feed', feed_url=feed.url) }}">
+                                {% if feed.data %}
+                                    {{ feed.data.title }}
+                                {% else %}
+                                    {{ feed.url|truncate(50) }}
+                                {% endif %}
+                            </a>
+                        </h2>
+                        <a href="{{ url_for('remove_feed', feed_url=feed.url) }}" 
+                           class="remove-btn"
+                           onclick="return confirm('Are you sure you want to remove this feed?')">
+                            ✕
+                        </a>
+                    </div>
+                    
+                    {% if feed.error %}
+                        <div class="error-message">
+                            Error: {{ feed.error }}
+                        </div>
+                    {% elif feed.data %}
+                        <p class="feed-description">{{ feed.data.description|truncate(150) }}</p>
+                        <div class="entry-list">
+                            {% for entry in feed.data.entries %}
+                                <div class="entry-item">
+                                    <a href="{{ entry.link }}" target="_blank" class="entry-title">
+                                        {{ entry.title }}
+                                    </a>
+                                    <span class="entry-date">
+                                        {% if entry.published %}
+                                            {{ entry.published }}
+                                        {% endif %}
+                                    </span>
+                                    <p class="entry-summary">{{ entry.summary|striptags|truncate(120) }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="feed-actions">
+                            <a href="{{ url_for('view_feed', feed_url=feed.url) }}" class="view-all-btn">
+                                View all {{ feed.data.total_entries }} entries →
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p>You haven't added any RSS feeds yet.</p>
+            <a href="{{ url_for('add_feed') }}" class="btn btn-primary">Add Your First Feed</a>
+        </div>
+    {% endif %}
+{% endblock %}
